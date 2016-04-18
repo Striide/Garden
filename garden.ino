@@ -5,17 +5,19 @@
 #define ONE_DAY_MILLIS (24 * 60 * 60 * 1000)
 
 // Zone - Jumper mappings
-#define ZONE1 3
-#define ZONE2 4
-#define ZONE3 5
-#define ZONE4 6
+#define ZONE1 D3
+#define ZONE2 D4
+#define ZONE3 D5
+#define ZONE4 D6
 
 // ************************* VARIABLES *************************
 
 unsigned long last_cloud_time_sync = millis();
-byte zone_state_array[4] = {0,0,0,0};
-byte zones[4] = {ZONE1, ZONE2, ZONE3, ZONE4};
+int num_of_zones = 4;
+byte zone_state_array[num_of_zones] = {0,0,0,0};
+byte zones[num_of_zones] = {ZONE1, ZONE2, ZONE3, ZONE4};
 byte test_timer = 20;	// seconds for "relay test heartbeat timer"
+
 
 void setup() {
 
@@ -23,14 +25,14 @@ void setup() {
 	set_time_zone(-7);
 
 	// pin setup and initialization
-	for (int i = 0; i < 4; i++){
+	for (int i = 0; i < num_of_zones; i++){
 		pinMode(zones[i], OUTPUT);
 		digitalWrite(zones[i], LOW);
 	}
 	
 	Particle.publish("striide.garden.online");
 	Particle.function("runZone", runZone);
-	//Particle.function("allOff", zones_all_off);
+	Particle.function("allOff", zones_all_off);
 }
 
 void loop() {
@@ -41,6 +43,8 @@ void loop() {
 int runZone(String zone) {
     Particle.publish("striide.garden.runzone",zone);
     int zone_i = zone.toInt();
+    
+    change_zone_valve(zone_i,true);
 }
 
 // ************************* ZONE FUNCTIONS *************************
@@ -49,28 +53,33 @@ void run_zone_for_duration(char zone_number, int duration){
 	// turn on zone for duration
 
 	// set timer and run
-	change_zone_valve(zone_number, 1);
+	//change_zone_valve(zone_number, true);
 }
 
-bool change_zone_valve(char zone_number, bool on_or_off){
+bool change_zone_valve(int zone_number, bool on_or_off){
 	// turn the specified zone on or off
 	String status;
 
 	if (on_or_off){
 		status = "on";
+        digitalWrite(zones[zone_number-1], HIGH);
 	} else {
 		status = "off";
+        digitalWrite(zones[zone_number-1], LOW);
 	}
 
 	Particle.publish("striide.garden.runzone.valve", String(zone_number + ":" + status));
-
+    
 	return on_or_off;
 }
 
-void zones_all_off(){
+int zones_all_off(){
 	// turn all zones off
 
 	Particle.publish("striide.garden.all_off");
+    for (int i = 0; i < num_of_zones; i++){
+		digitalWrite(zones[i], LOW);
+	}
 }
 
 // ************************* TIME FUNCTIONS *************************
