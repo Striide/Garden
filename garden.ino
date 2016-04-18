@@ -59,6 +59,12 @@ void loop() {
     {
         zones_all_off("");
     }
+    else
+    {
+        dString = (currentTime - stopTime) + " seconds remaining";
+    }
+        
+    
 }
 int readZone(String command)
 {
@@ -85,13 +91,8 @@ int readDuration(String command)
 // *************** Particle Functions **********************************
 int runZone(String command) {
     
-    Serial.print("runZone...");
-    Serial.println(command);
-    
     int zone_i = readZone(command);
     int zone_duration = readDuration(command);
-    Serial.println("zone: " + zone_i);
-    Serial.println("duration: " + zone_duration);
     
     if(zone_i > 0 && zone_duration > 0)
     {
@@ -116,11 +117,10 @@ void run_zone_for_duration(int zone_number, int duration){
     // set the stopTime
     stopTime = currentTime + duration;
     change_zone_valve(zone_number,true);
+    dString = duration + " seconds";
     
     char str[80];
     sprintf(str, "duration(%d):stopTime(%lu):currentTime(%lu)", duration, stopTime, currentTime);
-    
-    Particle.publish("striide.garden.runzone.duration",str);
 }
 
 bool change_zone_valve(int zone_number, bool on_or_off){
@@ -135,8 +135,6 @@ bool change_zone_valve(int zone_number, bool on_or_off){
         digitalWrite(zones[zone_number-1], HIGH);
         sString = zone_number + "is on";
 	}
-
-	//Particle.publish("striide.garden.runzone.valve", String(zone_number + ":" + status));
     
 	return on_or_off;
 }
