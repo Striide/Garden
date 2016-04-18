@@ -1,5 +1,5 @@
 // This #include statement was automatically added by the Particle IDE.
-#include "TimeAlarms/TimeAlarms.h"
+// #include "TimeAlarms/TimeAlarms.h"
 
 // ************************* DEFINITIONS *************************
 #define ONE_DAY_MILLIS (24 * 60 * 60 * 1000)
@@ -28,18 +28,18 @@ void setup() {
 		digitalWrite(zones[i], LOW);
 	}
 	
-	Spark.publish("striide.garden.online");
-	Spark.function("runZone", runZone);
-	Spark.function("allOff", zones_all_off);
+	Particle.publish("striide.garden.online");
+	Particle.function("runZone", runZone);
+	//Particle.function("allOff", zones_all_off);
 }
 
 void loop() {
 
 }
 
-// *************** Spark Functions **********************************
+// *************** Particle Functions **********************************
 int runZone(String zone) {
-    Spark.publish("striide.garden.runzone",zone);
+    Particle.publish("striide.garden.runzone",zone);
     int zone_i = zone.toInt();
 }
 
@@ -62,7 +62,7 @@ bool change_zone_valve(char zone_number, bool on_or_off){
 		status = "off";
 	}
 
-	Spark.publish("striide.garden.runzone.valve", String(zone_number + ":" + status));
+	Particle.publish("striide.garden.runzone.valve", String(zone_number + ":" + status));
 
 	return on_or_off;
 }
@@ -70,7 +70,7 @@ bool change_zone_valve(char zone_number, bool on_or_off){
 void zones_all_off(){
 	// turn all zones off
 
-	Spark.publish("striide.garden.all_off");
+	Particle.publish("striide.garden.all_off");
 }
 
 // ************************* TIME FUNCTIONS *************************
@@ -91,8 +91,8 @@ bool check_sync_timer(){
 
 void sync_time_with_cloud(){
 	// update current time on microprocessor
-// 	Spark.syncTime();
+// 	Particle.syncTime();
 	last_cloud_time_sync = millis();
 
-	Spark.publish("striide.garden.runzone");
+	Particle.publish("striide.garden.runzone");
 }
